@@ -90,15 +90,15 @@ ITEM_PIPELINES = {
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-HTTPCACHE_ENABLED = config('HTTPCACHE_ENABLED', default=True, cast=bool)
+HTTPCACHE_ENABLED = config('HTTPCACHE_ENABLED', default=False, cast=bool)
 HTTPCACHE_EXPIRATION_SECS = 3 * 60 * 60  # 3 hours
 HTTPCACHE_IGNORE_HTTP_CODES = []
 HTTPCACHE_STORAGE = 'scrapy_memcached_cache.MemcachedCacheStorage'
-MEMCACHED_LOCATION = config('MEMCACHED_LOCATION')
+#MEMCACHED_LOCATION = config('MEMCACHED_LOCATION')
 
 # Settings for Scrapy to filter and save bills
 MATCHERS = config('KEYWORDS', default=None, cast=keyword_matcher_parser)
-START_DATE = config('START_DATE')
+START_DATE = "2000-11-07"
 FEED_FORMAT = 'csv'
 FEED_URI = str(Path() / 'data' / '%(name)s-%(time)s.csv')
 

@@ -15,7 +15,7 @@ from raspadorlegislativo.spiders import BillSpider
 class CamaraMixin:
 
     def request_all_remaining_pages(self, response):
-        contents = json.loads(response.body_as_unicode())
+        contents = json.loads(response.text)
         links = contents.get('links', tuple())
         pattern = r'pagina=(?P<last>\d+)'
         for link in links:
@@ -54,7 +54,7 @@ class CamaraSpider(BillSpider, CamaraMixin):
 
     def parse(self, response):
         """Parser p/ página que lista todos os PLs da Câmara"""
-        contents = json.loads(response.body_as_unicode())
+        contents = json.loads(response.text)
         bills = contents.get('dados', tuple())
         for bill in bills:
             yield JsonRequest(bill.get('uri'), self.parse_bill, errback=self.error)
@@ -64,7 +64,7 @@ class CamaraSpider(BillSpider, CamaraMixin):
 
     def parse_bill(self, response):
         """Parser p/ página do PL. Encadeia o parser da página de autoria."""
-        bill = json.loads(response.body_as_unicode()).get('dados', {})
+        bill = json.loads(response.text).get('dados', {})
 
         keywords = bill.get('keywords')
         if not isinstance(keywords, str):
@@ -107,7 +107,7 @@ class CamaraSpider(BillSpider, CamaraMixin):
                     if author_id:
                         yield author_id
 
-        data = json.loads(response.body_as_unicode())
+        data = json.loads(response.text)
         authors = data.get('dados')
         authorship = (author.get('nome') for author in authors)
         response.meta['bill']['autoria'] = ', '.join(authorship)
@@ -121,7 +121,7 @@ class CamaraSpider(BillSpider, CamaraMixin):
 
     def parse_local(self, response):
         """Parser p/ página de local. Encadeia parser p/ inteiro teor."""
-        local = json.loads(response.body_as_unicode()).get('dados', {})
+        local = json.loads(response.text).get('dados', {})
         response.meta['bill']['local'] = local.get('nome')
 
         url = response.meta['urls'].pop('pdf')
@@ -167,7 +167,7 @@ class AgendaCamaraSpider(Spider, CamaraMixin):
 
     def parse(self, response):
         """Parser para página que lista todos os eventos da Câmara"""
-        contents = json.loads(response.body_as_unicode())
+        contents = json.loads(response.text)
         for event in contents.get('dados', tuple()):
             yield Request(
                 self.urls['details'].format(event['id']),

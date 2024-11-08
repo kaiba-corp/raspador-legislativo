@@ -2,7 +2,7 @@ import os
 from contextlib import contextmanager
 from tempfile import mkstemp
 
-from PyPDF2 import PdfFileReader
+from PyPDF2 import PdfReader
 from scrapy import Spider
 from scrapy.spidermiddlewares.httperror import HttpError
 
@@ -21,17 +21,22 @@ class BillSpider(Spider):
 
         try:
             with open(tmp, 'rb') as fobj:
-                pdf = PdfFileReader(fobj)
+                pdf = PdfReader(fobj)
+                # Extract text from all pages and join them into a single string
                 contents = '\n'.join(
-                    pdf.getPage(num).extractText()
-                    for num in range(pdf.numPages)
+                    pdf.pages[num].extract_text()
+                    for num in range(len(pdf.pages))
                 )
                 yield contents
-        except:
-            self.logger.debug(f'Could not read the PDF for {response.url}')
+
+        except Exception as e:
+            self.logger.debug(f'Could not read the PDF from {response.url}')
             yield ''
 
-        os.remove(tmp)
+        # Clean up: close and delete the temporary file
+        finally:  
+            os.close(_)
+            os.remove(tmp)
 
     @staticmethod
     def collect_keywords(bill, text):
