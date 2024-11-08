@@ -1,8 +1,6 @@
 import logging
-from pathlib import Path
-
+from datetime import datetime
 from decouple import config
-
 from raspadorlegislativo.matchers import keyword_matcher_parser
 
 # Scrapy settings for raspadorlegislativo project
@@ -46,10 +44,10 @@ DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'  # disable dupefilter
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-#}
+# Accept only JSON responses
+DEFAULT_REQUEST_HEADERS = {
+    'Accept': 'application/json',
+}
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
@@ -90,17 +88,29 @@ ITEM_PIPELINES = {
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-HTTPCACHE_ENABLED = config('HTTPCACHE_ENABLED', default=False, cast=bool)
-HTTPCACHE_EXPIRATION_SECS = 3 * 60 * 60  # 3 hours
-HTTPCACHE_IGNORE_HTTP_CODES = []
-HTTPCACHE_STORAGE = 'scrapy_memcached_cache.MemcachedCacheStorage'
+#HTTPCACHE_ENABLED = config('HTTPCACHE_ENABLED', default=False, cast=bool)
+#HTTPCACHE_EXPIRATION_SECS = 3 * 60 * 60  # 3 hours
+#HTTPCACHE_IGNORE_HTTP_CODES = []
+# HTTPCACHE_STORAGE = 'scrapy_memcached_cache.MemcachedCacheStorage'
 #MEMCACHED_LOCATION = config('MEMCACHED_LOCATION')
 
 # Settings for Scrapy to filter and save bills
 MATCHERS = config('KEYWORDS', default=None, cast=keyword_matcher_parser)
-START_DATE = "2000-11-07"
-FEED_FORMAT = 'csv'
-FEED_URI = str(Path() / 'data' / '%(name)s-%(time)s.csv')
+START_DATE = config('START_DATE')
+
+# Get the current timestamp
+timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+# Set the feed paths dynamically using relative paths
+FEED = config('FEED')
+
+FEEDS = {
+    f'data/output_{timestamp}.{FEED}': {
+        'format': '{FEED}',
+        'encoding': 'utf8',
+        'store_empty': False,
+    },
+}
 
 # Settings to communicate with Radar Legislativo API
 RASPADOR_API_URL = config('RASPADOR_API_URL', default=None)

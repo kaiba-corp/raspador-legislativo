@@ -1,0 +1,10 @@
+services:
+  scrapy:
+    build:
+      context: .
+    env_file:
+      - .env
+    volumes:
+      - ./:/code
+      - ./secrets:/mnt/secrets
+    command: ["python", "run.py"]

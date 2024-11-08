@@ -3,6 +3,6 @@
 .pytest_cache/
 .scrapy/
 __pycache__/
-data/*.csv
+data/*
 secrets/*.*
 !secrets/*.sample

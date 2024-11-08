@@ -2,4 +2,4 @@ markdownify==0.13.1
 PyPDF2==3.0.1
 python-decouple==3.8
 pytz==2024.2
-scrapy==2.11.2
+Scrapy==2.11.2
